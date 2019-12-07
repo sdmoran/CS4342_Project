@@ -36,3 +36,10 @@ with open('TrainData_Labeled.csv', 'w', newline='') as csvfile:
     writer.writerow(feature_names)
     for row in labeled_data:
         writer.writerow(row)
+
+# Write test data to more readable format
+with open('TestData.csv', 'w', newline='') as csvfile:
+    writer = csv.writer(csvfile)
+    writer.writerow(feature_names)
+    for row in test_data:
+        writer.writerow(row)
