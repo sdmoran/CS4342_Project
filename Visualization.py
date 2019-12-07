@@ -10,6 +10,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.neighbors import KNeighborsClassifier
 # from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.model_selection import train_test_split, cross_val_score
+from PIL import Image
 from xgboost import XGBRegressor
 from sklearn.metrics import mean_absolute_error, accuracy_score
 
@@ -32,6 +33,61 @@ def classify(model, data, print_csv=False):
     model.fit(X_train, y_train)
 
     pred = model.predict(X_test)
+    
+    # print(classification_report(y_test, pred))
+    scores = cross_val_score(model, X_test, y_test, cv=5)
+    print("Accuracy: %0.2f (+/- %0.2f)\n" % (scores.mean(), scores.std() * 2))
+
+def performPlots(data):
+    X = np.asarray(data)[:, :11]
+    y = np.asarray(data)[:, 11]
+    dataToPlot = [] #array which holds arrays of each variable
+    for i in range(0, 11):
+        dataToPlot.append([])
+    dataToClass = []
+    for i in range(0, len(X)):
+        for j in range(0, len(X[i])):
+            dataToPlot[j].append(X[i][j])
+        dataToClass.append(y[i])
+        #plt.plot(datax, datay, 'x')
+    newArray = groupData(dataToPlot, dataToClass)
+    for arr in range(0, len(newArray)):
+        datax = [item[0] for item in newArray[arr]]
+        datay = [item[1] for item in newArray[arr]]
+        color = colorFromIndex(arr+3)
+        plt.plot(datax, datay, 'x', label=arr+3, color=color)
+    #plt.plot(dataToPlot[i], dataToPlot)
+    #plt.axis('equal')
+    plt.legend()
+    plt.savefig("pls.png")
+    plt.show()
+    #im = Image.open("pls.png") 
+    #im.show()
+
+def colorFromIndex(index):
+    if index == 3:
+        return '#ffcccc'
+    elif index == 4:
+        return '#99ff99'
+    elif index == 5:
+        return '#00ffff'
+    elif index == 6:
+        return '#ff5050'
+    elif index == 7:
+        return '#003366'
+    else:
+        return '#000000'
+
+def groupData(dataToPlot, dataToClass):
+    firstParam = dataToPlot[0]
+    secondParam = dataToPlot[1]
+    arr = []
+    for i in range(0, 6):
+        arr.append([])
+    for j in range(0, len(firstParam)):
+        arr[int(dataToClass[j])-3].append([firstParam[j], secondParam[j]])
+    #print(arr[1])
+    return arr
     # Rounds predictions to nearest value for cases like XGBoost
     pred = [round(value) for value in pred]
 
@@ -58,7 +114,7 @@ def classify(model, data, print_csv=False):
             for row in realpred:
                 writer.writerow([row])
     
-# Heatmap correlations between different variables.
+#Heatmap correlations between different variables.
 plt.figure(figsize=(12, 12))
 sns.heatmap(data=data.corr(), annot=True)
 #plt.show()
@@ -78,6 +134,7 @@ rfc = RandomForestClassifier(n_estimators=500)
 print("Random Forest classifier results:")
 classify(rfc, data)
 
+performPlots(data)
 # Classify with EXTREME GRADIENT BOOOOSTING & print report
 xgb = XGBRegressor(n_estimators=1500, learning_rate=0.05, n_jobs=4, objective='reg:squarederror', tree_method='hist')
 print("EXTREME Gradient Boosting results:")
