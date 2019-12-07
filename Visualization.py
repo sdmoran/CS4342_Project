@@ -10,6 +10,8 @@ from sklearn.neighbors import KNeighborsClassifier
 # from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.model_selection import train_test_split, cross_val_score
 from PIL import Image
+from xgboost import XGBRegressor
+from sklearn.metrics import mean_absolute_error, accuracy_score
 
 data = pd.read_csv('./data/TrainData_Labeled.csv')
 
@@ -27,6 +29,7 @@ def classify(model, data):
     # Classify with given model and print report
     model.fit(X_train, y_train)
     pred = model.predict(X_test)
+    
     # print(classification_report(y_test, pred))
     scores = cross_val_score(model, X_test, y_test, cv=5)
     print("Accuracy: %0.2f (+/- %0.2f)\n" % (scores.mean(), scores.std() * 2))
@@ -81,10 +84,22 @@ def groupData(dataToPlot, dataToClass):
         arr[int(dataToClass[j])-3].append([firstParam[j], secondParam[j]])
     #print(arr[1])
     return arr
+=======
+    # Rounds predictions to nearest value for cases like XGBoost
+    pred = [round(value) for value in pred]
+    #print(classification_report(y_test, pred))
+    #scores = cross_val_score(model, X_test, y_test, cv=5)
+    #print("Accuracy: %0.2f (+/- %0.2f)\n" % (scores.mean(), scores.std() * 2))
+    mae = mean_absolute_error(pred, y_test)
+    print("Mean absolute error: %f" % (mae))
+    acc_score = accuracy_score(y_test, pred)
+    print("Accuracy score: %2f\n" %(acc_score))
+>>>>>>> a68b1c600942f227374a95418ec539ca02537567
     
 Heatmap correlations between different variables.
 plt.figure(figsize=(12, 12))
 sns.heatmap(data=data.corr(), annot=True)
+#plt.show()
 
 # Classify with Stochastic Gradient Descent & print report
 sgd = SGDClassifier(penalty=None)
@@ -102,3 +117,7 @@ print("Random Forest classifier results:")
 classify(rfc, data)
 
 performPlots(data)
+# Classify with EXTREME GRADIENT BOOOOSTING & print report
+xgb = XGBRegressor(n_estimators=750, learning_rate=0.05, n_jobs=4, objective='reg:squarederror', tree_method='hist')
+print("EXTREME Gradient Boosting results:")
+classify(xgb, data)

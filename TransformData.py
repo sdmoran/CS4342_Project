@@ -2,11 +2,6 @@
 # This is mostly utility stuff.
 
 import csv
-with open('TrainData_Labeled.csv', 'w', newline='') as csvfile:
-    writer = csv.writer(csvfile)
-    writer.writerow(feature_names)
-    for row in labeled_data:
-        writer.writerow(row)
         
 # Loads a CSV file from the given path
 # @param path: the path of the file to open
@@ -35,3 +30,9 @@ test_data, test_features = load_from_csv('./data/winequality-redTestData.csv', l
 
 # Combine data with labels
 labeled_data = [data[i] + labels[i] for i in range(len(data))]
+
+with open('TrainData_Labeled.csv', 'w', newline='') as csvfile:
+    writer = csv.writer(csvfile)
+    writer.writerow(feature_names)
+    for row in labeled_data:
+        writer.writerow(row)
