@@ -84,7 +84,6 @@ def groupData(dataToPlot, dataToClass):
         arr[int(dataToClass[j])-3].append([firstParam[j], secondParam[j]])
     #print(arr[1])
     return arr
-=======
     # Rounds predictions to nearest value for cases like XGBoost
     pred = [round(value) for value in pred]
     #print(classification_report(y_test, pred))
@@ -94,9 +93,8 @@ def groupData(dataToPlot, dataToClass):
     print("Mean absolute error: %f" % (mae))
     acc_score = accuracy_score(y_test, pred)
     print("Accuracy score: %2f\n" %(acc_score))
->>>>>>> a68b1c600942f227374a95418ec539ca02537567
     
-Heatmap correlations between different variables.
+#Heatmap correlations between different variables.
 plt.figure(figsize=(12, 12))
 sns.heatmap(data=data.corr(), annot=True)
 #plt.show()
