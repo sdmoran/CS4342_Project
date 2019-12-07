@@ -13,6 +13,7 @@ from sklearn.model_selection import train_test_split, cross_val_score
 from PIL import Image
 from xgboost import XGBRegressor
 from sklearn.metrics import mean_absolute_error, accuracy_score
+from itertools import combinations 
 
 data = pd.read_csv('./data/TrainData_Labeled.csv')
 test_data = pd.read_csv('./data/TestData.csv')
@@ -51,18 +52,22 @@ def performPlots(data):
         dataToClass.append(y[i])
         #plt.plot(datax, datay, 'x')
     newArray = groupData(dataToPlot, dataToClass)
-    for arr in range(0, len(newArray)):
-        datax = [item[0] for item in newArray[arr]]
-        datay = [item[1] for item in newArray[arr]]
-        color = colorFromIndex(arr+3)
-        plt.plot(datax, datay, 'x', label=arr+3, color=color)
-    #plt.plot(dataToPlot[i], dataToPlot)
-    #plt.axis('equal')
-    plt.legend()
-    plt.savefig("pls.png")
-    plt.show()
-    #im = Image.open("pls.png") 
-    #im.show()
+    choices = list(range(12))
+    subsets = list(combinations(choices, 2))
+    for sub in subsets:
+        print(sub)
+        for arr in range(0, len(newArray)):
+            datax = [item[sub[0]] for item in newArray[arr]]
+            datay = [item[sub[1]] for item in newArray[arr]]
+            #+3 because labels start at 3
+            color = colorFromIndex(arr+3)
+            plt.plot(datax, datay, 'x', label=arr+3, color=color)
+        #plt.plot(dataToPlot[i], dataToPlot)
+        #plt.axis('equal')
+        plt.legend()
+        plt.savefig("pls.png")
+    im = Image.open("pls.png") 
+    im.show()
 
 def colorFromIndex(index):
     if index == 3:
@@ -115,24 +120,24 @@ def groupData(dataToPlot, dataToClass):
                 writer.writerow([row])
     
 #Heatmap correlations between different variables.
-plt.figure(figsize=(12, 12))
-sns.heatmap(data=data.corr(), annot=True)
+#plt.figure(figsize=(12, 12))
+#sns.heatmap(data=data.corr(), annot=True)
 #plt.show()
 
 # Classify with Stochastic Gradient Descent & print report
-sgd = SGDClassifier(penalty=None)
-print("Stochastic Gradient Descent classifier results:")
-classify(sgd, data)
+#sgd = SGDClassifier(penalty=None)
+#print("Stochastic Gradient Descent classifier results:")
+#classify(sgd, data)
 
 # Classify with K Nearest Neighbors & print report
-knn = KNeighborsClassifier(n_neighbors = 5)
-print("K Nearest Neighbors classifier results:")
-classify(knn, data)
+#knn = KNeighborsClassifier(n_neighbors = 5)
+#print("K Nearest Neighbors classifier results:")
+#classify(knn, data)
 
 # Classify with Random Forest Classifier & print report
-rfc = RandomForestClassifier(n_estimators=500)
-print("Random Forest classifier results:")
-classify(rfc, data)
+#rfc = RandomForestClassifier(n_estimators=500)
+#print("Random Forest classifier results:")
+#classify(rfc, data)
 
 performPlots(data)
 # Classify with EXTREME GRADIENT BOOOOSTING & print report
