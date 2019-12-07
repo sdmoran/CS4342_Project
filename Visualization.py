@@ -104,7 +104,7 @@ def colorFromIndex(index):
         return '#000000'
 
 def groupData(dataToPlot, dataToClass):
-    firstParam = dataToPlot[0]1
+    firstParam = dataToPlot[0]
     secondParam = dataToPlot[1]
     arr = []
     for i in range(0, 6):
