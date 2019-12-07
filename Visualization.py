@@ -1,5 +1,6 @@
 # Imports
 import matplotlib.pyplot as plt
+import csv
 import pandas as pd
 import numpy as np
 import seaborn as sns
@@ -14,11 +15,13 @@ from xgboost import XGBRegressor
 from sklearn.metrics import mean_absolute_error, accuracy_score
 
 data = pd.read_csv('./data/TrainData_Labeled.csv')
+test_data = pd.read_csv('./data/TestData.csv')
 
 # Performs classification with given model and data.
 # @param model: the SKLearn model to use for predictions
 # @param data: The data to use for training and testing
-def classify(model, data):
+# @param print_csv: whether or not the output should be printed to a CSV file
+def classify(model, data, print_csv=False):
     # Convert data from Pandas DataFrame to np array for X and y
     X = np.asarray(data)[:, :11]
     y = np.asarray(data)[:, 11]
@@ -28,6 +31,7 @@ def classify(model, data):
     
     # Classify with given model and print report
     model.fit(X_train, y_train)
+
     pred = model.predict(X_test)
     
     # print(classification_report(y_test, pred))
@@ -86,13 +90,29 @@ def groupData(dataToPlot, dataToClass):
     return arr
     # Rounds predictions to nearest value for cases like XGBoost
     pred = [round(value) for value in pred]
-    #print(classification_report(y_test, pred))
-    #scores = cross_val_score(model, X_test, y_test, cv=5)
+
+    print(classification_report(y_test, pred))
+    scores = cross_val_score(model, X_test, y_test, cv=5)
+    # This particular metric is probably not as useful as the whole report, printed below
     #print("Accuracy: %0.2f (+/- %0.2f)\n" % (scores.mean(), scores.std() * 2))
     mae = mean_absolute_error(pred, y_test)
     print("Mean absolute error: %f" % (mae))
     acc_score = accuracy_score(y_test, pred)
     print("Accuracy score: %2f\n" %(acc_score))
+    testdata = np.asarray(data)[:, :11]
+    pred = model.predict(testdata)
+    pred = [round(value) for value in pred]
+
+    # Do it on the REAL test data
+    realtest = np.asarray(test_data)[:, :11]
+    realpred = model.predict(realtest)
+    realpred = [round(value) for value in realpred]
+    # Print to CSV
+    if print_csv:
+        with open('result.csv', 'w', newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            for row in realpred:
+                writer.writerow([row])
     
 #Heatmap correlations between different variables.
 plt.figure(figsize=(12, 12))
@@ -110,12 +130,12 @@ print("K Nearest Neighbors classifier results:")
 classify(knn, data)
 
 # Classify with Random Forest Classifier & print report
-rfc = RandomForestClassifier(n_estimators=250)
+rfc = RandomForestClassifier(n_estimators=500)
 print("Random Forest classifier results:")
 classify(rfc, data)
 
 performPlots(data)
 # Classify with EXTREME GRADIENT BOOOOSTING & print report
-xgb = XGBRegressor(n_estimators=750, learning_rate=0.05, n_jobs=4, objective='reg:squarederror', tree_method='hist')
+xgb = XGBRegressor(n_estimators=1500, learning_rate=0.05, n_jobs=4, objective='reg:squarederror', tree_method='hist')
 print("EXTREME Gradient Boosting results:")
-classify(xgb, data)
+classify(xgb, data, print_csv=False)
