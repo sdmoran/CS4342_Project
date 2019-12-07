@@ -33,10 +33,35 @@ def classify(model, data, print_csv=False):
     model.fit(X_train, y_train)
 
     pred = model.predict(X_test)
-    
+    # Rounds predictions to nearest value for cases like XGBoost
+    pred = [round(value) for value in pred]
+
     # print(classification_report(y_test, pred))
     scores = cross_val_score(model, X_test, y_test, cv=5)
     print("Accuracy: %0.2f (+/- %0.2f)\n" % (scores.mean(), scores.std() * 2))
+
+    print(classification_report(y_test, pred))
+    scores = cross_val_score(model, X_test, y_test, cv=5)
+    # This particular metric is probably not as useful as the whole report, printed below
+    #print("Accuracy: %0.2f (+/- %0.2f)\n" % (scores.mean(), scores.std() * 2))
+    mae = mean_absolute_error(pred, y_test)
+    print("Mean absolute error: %f" % (mae))
+    acc_score = accuracy_score(y_test, pred)
+    print("Accuracy score: %2f\n" %(acc_score))
+    testdata = np.asarray(data)[:, :11]
+    pred = model.predict(testdata)
+    pred = [round(value) for value in pred]
+
+    # Do it on the REAL test data
+    realtest = np.asarray(test_data)[:, :11]
+    realpred = model.predict(realtest)
+    realpred = [round(value) for value in realpred]
+    # Print to CSV
+    if print_csv:
+        with open('result.csv', 'w', newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            for row in realpred:
+                writer.writerow([row])
 
 def performPlots(data):
     X = np.asarray(data)[:, :11]
@@ -79,7 +104,7 @@ def colorFromIndex(index):
         return '#000000'
 
 def groupData(dataToPlot, dataToClass):
-    firstParam = dataToPlot[0]
+    firstParam = dataToPlot[0]1
     secondParam = dataToPlot[1]
     arr = []
     for i in range(0, 6):
@@ -88,36 +113,11 @@ def groupData(dataToPlot, dataToClass):
         arr[int(dataToClass[j])-3].append([firstParam[j], secondParam[j]])
     #print(arr[1])
     return arr
-    # Rounds predictions to nearest value for cases like XGBoost
-    pred = [round(value) for value in pred]
-
-    print(classification_report(y_test, pred))
-    scores = cross_val_score(model, X_test, y_test, cv=5)
-    # This particular metric is probably not as useful as the whole report, printed below
-    #print("Accuracy: %0.2f (+/- %0.2f)\n" % (scores.mean(), scores.std() * 2))
-    mae = mean_absolute_error(pred, y_test)
-    print("Mean absolute error: %f" % (mae))
-    acc_score = accuracy_score(y_test, pred)
-    print("Accuracy score: %2f\n" %(acc_score))
-    testdata = np.asarray(data)[:, :11]
-    pred = model.predict(testdata)
-    pred = [round(value) for value in pred]
-
-    # Do it on the REAL test data
-    realtest = np.asarray(test_data)[:, :11]
-    realpred = model.predict(realtest)
-    realpred = [round(value) for value in realpred]
-    # Print to CSV
-    if print_csv:
-        with open('result.csv', 'w', newline='') as csvfile:
-            writer = csv.writer(csvfile)
-            for row in realpred:
-                writer.writerow([row])
     
 #Heatmap correlations between different variables.
 plt.figure(figsize=(12, 12))
 sns.heatmap(data=data.corr(), annot=True)
-#plt.show()
+plt.show()
 
 # Classify with Stochastic Gradient Descent & print report
 sgd = SGDClassifier(penalty=None)
