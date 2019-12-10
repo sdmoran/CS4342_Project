@@ -3,6 +3,7 @@ import os
 import numpy as np
 import sklearn.discriminant_analysis as da
 from mlxtend.feature_selection import SequentialFeatureSelector as sfs
+import HigherOrderProducer as mop
 
 def train_qda(allData):
     Y = np.array(allData['label'])
@@ -11,9 +12,9 @@ def train_qda(allData):
     clf.fit(X,Y)
     return clf
 
-def partionData(allData, percentage):
-    trainingData = allData.loc[:percentage*len(allData)]
-    testingData = allData.loc[percentage*len(allData):]
+def partionData(data, percentage):
+    trainingData = data.loc[:percentage*len(data)]
+    testingData = data.loc[percentage*len(data):]
     return trainingData, testingData
 
 def testQda(clf, testingData, label):
@@ -43,30 +44,60 @@ def getBestFeaturesForQDA(trainingData):
         ).fit(x,y)
     return bestFeatures.k_feature_names_, bestFeatures.k_feature_idx_
 
+def getBestFeaturesForHigherOrderTerms(trainingData, num_features):
+    x = trainingData.loc[:, trainingData.columns != 'label']
+    y = trainingData.loc[:, 'label']
+    bestFeatures = sfs( da.QuadraticDiscriminantAnalysis(),
+        k_features=num_features,
+        forward=True,
+        floating=False,
+        verbose=2,
+        scoring='r2',
+        ).fit(x,y)
+    return bestFeatures.k_feature_names_
+
 if __name__ == "__main__":
-    allData = pd.read_csv(os.path.dirname(os.path.abspath(__file__))+'/data/TrainData_Labeled.csv')
-    trainingData, testingData = partionData(allData, .8)
-    qdaClf = train_qda(trainingData)
+    # allData = pd.read_csv(os.path.dirname(os.path.abspath(__file__))+'/data/TrainData_Labeled.csv')
+    # trainingData, testingData = partionData(allData, .8)
+    # qdaClf = train_qda(trainingData)
     
-    trainingY = trainingData['label']
+    # trainingY = trainingData['label']
 
-    testQda(qdaClf, testingData, "No subset selection")
+    # testQda(qdaClf, testingData, "No subset selection")
 
-    #Feature selection
-    bestFeatureNames, bestFeatureIdxs = getBestFeaturesForQDA(trainingData)
+    # #Feature selection
+    # bestFeatureNames, bestFeatureIdxs = getBestFeaturesForQDA(trainingData)
 
-    bestFeaturesList = list(bestFeatureNames)
-    bestFeaturesList.append('label')
+    # bestFeaturesList = list(bestFeatureNames)
+    # bestFeaturesList.append('label')
 
-    print(bestFeaturesList)
+    # print(bestFeaturesList)
 
-    bestFeaturesTrainingData = trainingData.loc[:, bestFeaturesList]
+    # bestFeaturesTrainingData = trainingData.loc[:, bestFeaturesList]
 
-    bestFeaturesTestingData = testingData.loc[:, bestFeaturesList]
+    # bestFeaturesTestingData = testingData.loc[:, bestFeaturesList]
 
-    print(f'Testing dataframe: \n{bestFeaturesTestingData}')
+    # print(f'Testing dataframe: \n{bestFeaturesTestingData}')
 
-    bestFeaturesQda = train_qda(bestFeaturesTrainingData)
+    # bestFeaturesQda = train_qda(bestFeaturesTrainingData)
 
-    testQda(bestFeaturesQda, bestFeaturesTestingData, "With forward subset selection")
+    # testQda(bestFeaturesQda, bestFeaturesTestingData, "With forward subset selection")
+    
+    multDf = pd.read_csv(os.path.dirname(os.path.abspath(__file__))+'/data/TrainData_Multiplicative.csv')
+    multTraining, multTesting = partionData(multDf, .8)
 
+    bestFeatures = getBestFeaturesForHigherOrderTerms(multTraining, 4)
+    #bestFeatures = list(['volatile acidity*pH*', 'density*alcohol*', 'volatile acidity*citric acid*pH*', 'volatile acidity*density*sulphates*', 'free sulfur dioxide*pH*alcohol*', 'volatile acidity*total sulfur dioxide*density*sulphates*', 'citric acid*residual sugar*density*sulphates*alcohol*'])
+    bestDfX = multTraining.loc[:,bestFeatures]
+    trainingY = multTraining['label']
+    bestDfX.insert(loc = len(bestDfX.columns),column='label', value=trainingY)
+    bestFeaturesQda = train_qda(bestDfX)
+
+    testingY = multTesting.loc[:,'label']
+    bestDfTesting = multTesting.loc[:, bestFeatures]
+    bestDfTesting.insert(loc = len(bestDfTesting.columns),column='label', value=testingY)
+
+    testQda(bestFeaturesQda,bestDfTesting,f'Testing with labels {bestFeatures}')
+
+    print(f'Test\n {bestDfTesting}\nTestY\n{trainingY}')
+    

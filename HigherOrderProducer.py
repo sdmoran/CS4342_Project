@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import itertools
+import os 
 
 def square(val):
     return val*val
@@ -28,8 +29,9 @@ def createMultiplicativeLabels(labels):
 def createMultiplicativeTerms(df):
     copyDf = df.copy()
     for i in range(2, len(copyDf.columns)):
-        combos = list(itertools.combinations(copyDf.columns[0:len(copyDf)-2], i))
+        combos = list(itertools.combinations(df.columns[0:len(df.columns)-1], i))
         for combo in combos:
+            print(combo)
             comboList = list(combo)
             newName = createMultiplicativeLabels(comboList)
             newPosition = len(copyDf.columns) - 1
@@ -42,7 +44,8 @@ def createMultiplicativeTerms(df):
     return copyDf
 
 if __name__ == "__main__":
-    frame = pd.DataFrame(np.array([[4,4,2],[0,2,2],[1,2,2], [3,6,2]]))
-    cop = createSquaredValues(frame)
-    cop = createMultiplicativeTerms(frame)
-    print(cop)
+    allData = pd.read_csv(os.path.dirname(os.path.abspath(__file__))+'/data/TrainData_Labeled.csv')
+    #testingData = allData.iloc[1:10, :]
+    testingData = createMultiplicativeTerms(allData)
+    #Save multiplicative data to file
+    testingData.to_csv('data/TrainData_Multiplicative.csv', index = False)
