@@ -44,10 +44,10 @@ def classify(model, data, print_csv=False):
     scores = cross_val_score(model, X_test, y_test, cv=5)
     # This particular metric is probably not as useful as the whole report, printed below
     #print("Accuracy: %0.2f (+/- %0.2f)\n" % (scores.mean(), scores.std() * 2))
-    mae = mean_absolute_error(pred, y_test)
-    print("Mean absolute error: %f" % (mae))
-    acc_score = accuracy_score(y_test, pred)
-    print("Accuracy score: %2f\n" %(acc_score))
+    # mae = mean_absolute_error(pred, y_test)
+    # print("Mean absolute error: %f" % (mae))
+    # acc_score = accuracy_score(y_test, pred)
+    # print("Accuracy score: %2f\n" %(acc_score))
     testdata = np.asarray(data)[:, :11]
     pred = model.predict(testdata)
     pred = [round(value) for value in pred]
@@ -117,25 +117,25 @@ def groupData(dataToPlot, dataToClass):
 #Heatmap correlations between different variables.
 plt.figure(figsize=(12, 12))
 sns.heatmap(data=data.corr(), annot=True)
-plt.show()
+#plt.show()
 
 # Classify with Stochastic Gradient Descent & print report
 sgd = SGDClassifier(penalty=None)
 print("Stochastic Gradient Descent classifier results:")
-classify(sgd, data)
+#classify(sgd, data)
 
 # Classify with K Nearest Neighbors & print report
 knn = KNeighborsClassifier(n_neighbors = 5)
 print("K Nearest Neighbors classifier results:")
-classify(knn, data)
+#classify(knn, data)
 
 # Classify with Random Forest Classifier & print report
 rfc = RandomForestClassifier(n_estimators=500)
 print("Random Forest classifier results:")
-classify(rfc, data)
+#classify(rfc, data)
 
-performPlots(data)
+#performPlots(data)
 # Classify with EXTREME GRADIENT BOOOOSTING & print report
-xgb = XGBRegressor(n_estimators=1500, learning_rate=0.05, n_jobs=4, objective='reg:squarederror', tree_method='hist')
+xgb = XGBRegressor(n_estimators=750, n_jobs=4, objective='reg:squarederror', tree_method='hist')
 print("EXTREME Gradient Boosting results:")
 classify(xgb, data, print_csv=False)
