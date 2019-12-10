@@ -13,7 +13,9 @@ from sklearn.model_selection import train_test_split, cross_val_score
 from PIL import Image
 from xgboost import XGBRegressor
 from sklearn.metrics import mean_absolute_error, accuracy_score
-from itertools import combinations 
+from itertools import combinations
+import HigherOrderProducer 
+import LogisticSubsetSelection
 
 data = pd.read_csv('./data/TrainData_Labeled.csv')
 test_data = pd.read_csv('./data/TestData.csv')
@@ -120,9 +122,10 @@ def colorFromIndex(index):
 #rfc = RandomForestClassifier(n_estimators=500)
 #print("Random Forest classifier results:")
 #classify(rfc, data)
-
-performPlots(data)
+LogisticSubsetSelection.performRegression(data)
+LogisticSubsetSelection.performRegression(data, 1)
+#performPlots(data)
 # Classify with EXTREME GRADIENT BOOOOSTING & print report
-xgb = XGBRegressor(n_estimators=1500, learning_rate=0.05, n_jobs=4, objective='reg:squarederror', tree_method='hist')
-print("EXTREME Gradient Boosting results:")
-classify(xgb, data, print_csv=False)
+#xgb = XGBRegressor(n_estimators=1500, learning_rate=0.05, n_jobs=4, objective='reg:squarederror', tree_method='hist')
+#print("EXTREME Gradient Boosting results:")
+#classify(xgb, data, print_csv=False)
