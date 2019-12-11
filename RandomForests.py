@@ -5,10 +5,12 @@ import os
 import DataOperations as do
 
 if __name__ == "__main__":
+    trainingData = pd.read_csv('./data/TrainData_Labeled.csv')
+
     multDf = pd.read_csv(os.path.dirname(os.path.abspath(__file__))+'/data/TrainData_Multiplicative.csv')
     multTraining, multTesting = do.partionData(multDf, .8)
     rfc = RandomForestClassifier(n_estimators=100)
-    bestFeatures = fs.getBestFeaturesForHigherOrderTerms(rfc, multTraining, 4, 'accuracy')
+    bestFeatures = fs.getBestFeaturesForHigherOrderTerms(rfc, multTraining, 1, 'accuracy')
     print(bestFeatures)
 
     trainingData = trainingData.loc[:, bestFeatures]

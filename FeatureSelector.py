@@ -8,6 +8,7 @@ def getBestFeaturesForHigherOrderTerms(clf, trainingData, num_features, scoringS
         forward=True,
         floating=False,
         verbose=2,
+        n_jobs=8, # Use ALL the cores!
         scoring=scoringString,
         ).fit(x,y)
     return bestFeatures.k_feature_names_
