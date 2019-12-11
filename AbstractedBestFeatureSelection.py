@@ -1,14 +1,12 @@
-import FeatureSelector as fs
-from sklearn.ensemble import RandomForestClassifier
 import pandas as pd
 import os
 import DataOperations as do
+import FeatureSelector as fs
 
-if __name__ == "__main__":
+def doBestFeatureSelection(clf, numFeatures):
     multDf = pd.read_csv(os.path.dirname(os.path.abspath(__file__))+'/data/TrainData_Multiplicative.csv')
     multTraining, multTesting = do.partionData(multDf, .8)
-    rfc = RandomForestClassifier(n_estimators=200)
-    bestFeatures = fs.getBestFeaturesForHigherOrderTerms(rfc, multTraining, 8, 'accuracy')
+    bestFeatures = fs.getBestFeaturesForHigherOrderTerms(clf, multTraining, numFeatures, 'accuracy')
     #bestFeatures = list(['alcohol', 'volatile acidity*total sulfur dioxide*density*', 'volatile acidity*chlorides*free sulfur dioxide*pH*', 'fixed acidity*volatile acidity*free sulfur dioxide*pH*sulphates*'])
     print(bestFeatures)
 
@@ -20,5 +18,5 @@ if __name__ == "__main__":
     testingY = multTesting['label']
     testingData.insert(loc = len(testingData.columns),column='label', value=testingY)
     print(testingData)
-    do.fitTrainingData(rfc, trainingData)
-    do.testClassifier(rfc, testingData, "Random Forests")
+    do.fitTrainingData(clf, trainingData)
+    do.testClassifier(clf, testingData, "Random Forests")
