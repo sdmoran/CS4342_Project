@@ -9,6 +9,7 @@ def getBestFeaturesForHigherOrderTerms(clf, trainingData, num_features, scoringS
         floating=False,
         verbose=2,
         scoring=scoringString,
+        n_jobs=5
         ).fit(x,y)
     return bestFeatures.k_feature_names_
 
