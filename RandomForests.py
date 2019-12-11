@@ -8,16 +8,17 @@ if __name__ == "__main__":
     multDf = pd.read_csv(os.path.dirname(os.path.abspath(__file__))+'/data/TrainData_Multiplicative.csv')
     multTraining, multTesting = do.partionData(multDf, .8)
     rfc = RandomForestClassifier(n_estimators=100)
-    bestFeatures = fs.getBestFeaturesForHigherOrderTerms(rfc, multTraining, 4, 'accuracy')
+    #bestFeatures = fs.getBestFeaturesForHigherOrderTerms(rfc, multTraining, 4, 'accuracy')
+    bestFeatures = list(['alcohol', 'volatile acidity*total sulfur dioxide*density*', 'volatile acidity*chlorides*free sulfur dioxide*pH*', 'fixed acidity*volatile acidity*free sulfur dioxide*pH*sulphates*'])
     print(bestFeatures)
 
-    trainingData = trainingData.loc[:, bestFeatures]
+    trainingData = multTraining.loc[:, bestFeatures]
     trainingY = multTraining['label']
     trainingData.insert(loc = len(trainingData.columns),column='label', value=trainingY)
 
-    testingData = testingData.loc[:, bestFeatures]
-    testingY = multTraining['label']
+    testingData = multTesting.loc[:, bestFeatures]
+    testingY = multTesting['label']
     testingData.insert(loc = len(testingData.columns),column='label', value=testingY)
-
+    print(testingData)
     do.fitTrainingData(rfc, trainingData)
     do.testClassifier(rfc, testingData, "Random Forests")
