@@ -20,8 +20,6 @@ def classify(model, X_train, y_train, X_test, y_test, print_csv=True):
     pred = [round(value) for value in pred]
 
     print(classification_report(y_test, pred))
-    scores = cross_val_score(model, X_test, y_test, cv=5)
-    print("Accuracy: %0.2f (+/- %0.2f)\n" % (scores.mean(), scores.std() * 2))
 
     # Do it on the REAL test data
     realtest = test_data[test_data.columns[:11]]
@@ -56,7 +54,7 @@ y = data[data.columns[11]]
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, )
 
 # Resample from training data, oversampling underrepresented classes
-X_resampled, y_resampled = SMOTE().fit_resample(X, y)
+X_resampled, y_resampled = BorderlineSMOTE().fit_resample(X_train, y_train)
 X_resampled.append(X_train)
 y_resampled.append(y_train)
 
@@ -65,32 +63,35 @@ for pt in y_resampled:
     classes[str(pt)] += 1
 
 # Print classification for regular data
-#classify(rfc, X_train, y_train, X_test, y_test)
+classify(rfc, X_train, y_train, X_test, y_test)
 
 print("Resampling classifier results:")
 rfc2 = RandomForestClassifier(n_estimators=500)
 
-#classify(rfc2, X_resampled, y_resampled, X_test, y_test)
+classify(rfc2, X_resampled, y_resampled, X_test, y_test)
 
 # Try it with XGB
-print("XGB classifier results:")
+print("XGB classifier results:")  
 xgb = XGBRegressor(n_estimators=750, n_jobs=4, objective='reg:squarederror', tree_method='hist')
-print("EXTREME Gradient Boosting results:")
-#classify(xgb, X_train, y_train, X_test, y_test)
+classify(xgb, X_train, y_train, X_test, y_test)
 
 
 # OK it seems like this one might be actually good actually for real for real though?
 print("XGB Resampling classifier results:")
 xgb2 = XGBRegressor(n_estimators=750, n_jobs=4, objective='reg:squarederror', tree_method='hist')
-print("EXTREME Gradient Boosting results:")
 #xgb_resample_results = classify(xgb2, X_resampled, y_resampled, X_test, y_test)
-xgb_resample_results = classify(xgb2, X_resampled, y_resampled, X_test, y_test, print_csv=True)
+xgb_resample_results = classify(xgb2, X_resampled, y_resampled, X_test, y_test, print_csv=True)   
 
-print(len(xgb_resample_results), len(y_test))
+# print(len(xgb_resample_results), len(y_test))
 
-correct = 0
-for i in range(len(y_test)):
-    if xgb_resample_results[i] == y_test.iloc[i]:
-        correct += 1
+# correct = 0
+# for i in range(len(y_test)):
+#     if xgb_resample_results[i] == y_test.iloc[i]:
+#         correct += 1
 
-print(f"Correct: {correct / len(y_test)}")
+# print(f"Correct: {correct / len(y_test)}")
+
+# What if we trained a bunch of binary classification regressors? Split them up into 3, 4, or 5 vs 6, 7, 8
+# Then do 6 or 7 vs 8 and 4 or 5 vs 3
+# Then do 6 vs 7 and 4 vs 5
+# tadahhh?
