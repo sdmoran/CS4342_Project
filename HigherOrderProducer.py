@@ -46,6 +46,6 @@ def createMultiplicativeTerms(df):
 if __name__ == "__main__":
     allData = pd.read_csv(os.path.dirname(os.path.abspath(__file__))+'/data/TrainData_Labeled.csv')
     #testingData = allData.iloc[1:10, :]
-    testingData = createMultiplicativeTerms(allData)
+    testingData = createSquaredValues(allData)
     #Save multiplicative data to file
-    testingData.to_csv('data/TrainData_Multiplicative.csv', index = False)
+    testingData.to_csv('data/TrainData_Squared.csv', index = False)
