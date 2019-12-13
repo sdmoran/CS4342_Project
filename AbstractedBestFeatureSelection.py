@@ -4,7 +4,7 @@ import DataOperations as do
 import FeatureSelector as fs
 
 def doBestFeatureSelection(clf, numFeatures):
-    multDf = pd.read_csv(os.path.dirname(os.path.abspath(__file__))+'/data/TrainData_Multiplicative.csv')
+    multDf = pd.read_csv(os.path.dirname(os.path.abspath(__file__))+'/data/TrainData_Labeled.csv')
     multTraining, multTesting = do.partionData(multDf, .8)
     bestFeatures = fs.getBestFeaturesForHigherOrderTerms(clf, multTraining, numFeatures, 'accuracy')
     #bestFeatures = list(['alcohol', 'volatile acidity*total sulfur dioxide*density*', 'volatile acidity*chlorides*free sulfur dioxide*pH*', 'fixed acidity*volatile acidity*free sulfur dioxide*pH*sulphates*'])
