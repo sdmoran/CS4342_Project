@@ -4,6 +4,7 @@ import numpy as np
 import sklearn.discriminant_analysis as da
 from mlxtend.feature_selection import SequentialFeatureSelector as sfs
 import HigherOrderProducer as mop
+import PCA
 
 def train_qda(allData):
     Y = np.array(allData['label'])
@@ -83,21 +84,29 @@ if __name__ == "__main__":
 
     # testQda(bestFeaturesQda, bestFeaturesTestingData, "With forward subset selection")
     
-    multDf = pd.read_csv(os.path.dirname(os.path.abspath(__file__))+'/data/TrainData_Multiplicative.csv')
-    multTraining, multTesting = partionData(multDf, .8)
+    # multDf = pd.read_csv(os.path.dirname(os.path.abspath(__file__))+'/data/TrainData_Multiplicative.csv')
+    # multTraining, multTesting = partionData(multDf, .8)
 
-    bestFeatures = getBestFeaturesForHigherOrderTerms(multTraining, 4)
-    #bestFeatures = list(['volatile acidity*pH*', 'density*alcohol*', 'volatile acidity*citric acid*pH*', 'volatile acidity*density*sulphates*', 'free sulfur dioxide*pH*alcohol*', 'volatile acidity*total sulfur dioxide*density*sulphates*', 'citric acid*residual sugar*density*sulphates*alcohol*'])
-    bestDfX = multTraining.loc[:,bestFeatures]
-    trainingY = multTraining['label']
-    bestDfX.insert(loc = len(bestDfX.columns),column='label', value=trainingY)
-    bestFeaturesQda = train_qda(bestDfX)
+    # bestFeatures = getBestFeaturesForHigherOrderTerms(multTraining, 11)
+    # #bestFeatures = list(['volatile acidity*pH*', 'density*alcohol*', 'volatile acidity*citric acid*pH*', 'volatile acidity*density*sulphates*', 'free sulfur dioxide*pH*alcohol*', 'volatile acidity*total sulfur dioxide*density*sulphates*', 'citric acid*residual sugar*density*sulphates*alcohol*'])
+    # bestDfX = multTraining.loc[:,bestFeatures]
+    # trainingY = multTraining['label']
+    # bestDfX.insert(loc = len(bestDfX.columns),column='label', value=trainingY)
+    # bestFeaturesQda = train_qda(bestDfX)
 
-    testingY = multTesting.loc[:,'label']
-    bestDfTesting = multTesting.loc[:, bestFeatures]
-    bestDfTesting.insert(loc = len(bestDfTesting.columns),column='label', value=testingY)
+    # testingY = multTesting.loc[:,'label']
+    # bestDfTesting = multTesting.loc[:, bestFeatures]
+    # bestDfTesting.insert(loc = len(bestDfTesting.columns),column='label', value=testingY)
 
-    testQda(bestFeaturesQda,bestDfTesting,f'Testing with labels {bestFeatures}')
+    # testQda(bestFeaturesQda,bestDfTesting,f'Testing with labels {bestFeatures}')
 
-    print(f'Test\n {bestDfTesting}\nTestY\n{trainingY}')
+    # print(f'Test\n {bestDfTesting}\nTestY\n{trainingY}')
+
+    #Run QDA on PCA data
+    qda = da.QuadraticDiscriminantAnalysis()
+    trainingX, trainingY, testingX, testingY = PCA.getPCATraingAndTesting(.95)
+    qda.fit(trainingX, trainingY)
+
+    score = qda.score(testingX, testingY)
+    print(score)
     
