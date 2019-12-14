@@ -91,6 +91,17 @@ xgb_resample_results = classify(xgb2, X_resampled, y_resampled, X_test, y_test, 
 
 # print(f"Correct: {correct / len(y_test)}")
 
+print("Imbalanced Classifier")
+from sklearn.tree import DecisionTreeClassifier
+from imblearn.ensemble import BalancedBaggingClassifier
+bbc = BalancedBaggingClassifier(base_estimator=DecisionTreeClassifier(),
+                                sampling_strategy='auto',
+                                replacement=False,
+                                random_state=0)
+bbc.fit(X_train, y_train)
+pred = bbc.predict(X_test)
+print(classification_report(y_test, pred))
+
 # What if we trained a bunch of binary classification regressors? Split them up into 3, 4, or 5 vs 6, 7, 8
 # Then do 6 or 7 vs 8 and 4 or 5 vs 3
 # Then do 6 vs 7 and 4 vs 5

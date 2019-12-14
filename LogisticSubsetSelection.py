@@ -3,7 +3,7 @@ import numpy as np
 import itertools
 import HigherOrderProducer
 from sklearn.linear_model import LogisticRegression
-#import QDA
+import QDA
 
 def performRegression(df, higherOrder=0):
     if higherOrder:

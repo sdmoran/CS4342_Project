@@ -7,10 +7,11 @@ import DataOperations as do
 if __name__ == "__main__":
     trainingData = pd.read_csv('./data/TrainData_Labeled.csv')
 
-    multDf = pd.read_csv(os.path.dirname(os.path.abspath(__file__))+'/data/TrainData_Multiplicative.csv')
+    # multDf = pd.read_csv(os.path.dirname(os.path.abspath(__file__))+'/data/TrainData_Multiplicative.csv')
+    multDf = pd.read_csv(os.path.dirname(os.path.abspath(__file__))+'/data/TrainData_Squared.csv')  # Squared training data
     multTraining, multTesting = do.partionData(multDf, .8)
-    rfc = RandomForestClassifier(n_estimators=200)
-    bestFeatures = fs.getBestFeaturesForHigherOrderTerms(rfc, multTraining, 8, 'accuracy')
+    rfc = RandomForestClassifier(n_estimators=500)
+    bestFeatures = fs.getBestFeaturesForHigherOrderTerms(rfc, multTraining, 'best', 'accuracy')
     #bestFeatures = list(['alcohol', 'volatile acidity*total sulfur dioxide*density*', 'volatile acidity*chlorides*free sulfur dioxide*pH*', 'fixed acidity*volatile acidity*free sulfur dioxide*pH*sulphates*'])
     print(bestFeatures)
 

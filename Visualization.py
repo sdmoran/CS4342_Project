@@ -16,8 +16,40 @@ from sklearn.metrics import mean_absolute_error, accuracy_score
 from itertools import combinations
 import HigherOrderProducer 
 import LogisticSubsetSelection
+from scipy import stats
 
 data = pd.read_csv('./data/TrainData_Labeled.csv')
+# print("Length of data: ", len(data))
+# data = data.drop_duplicates(keep='first')
+# print("Length of UNIQUE data: ", len(data))
+
+
+# Baseline performance for random state 27 before cleaning data:
+# Random Forest: 64/38/64
+# XGB: 62/36/62
+
+# Dropping Class 7 two outliers:
+# RF: 66/40/65 
+# XGB: 64/44/63
+
+# Dropping Class 7 two outliers and Class 6 outlier:
+# RF: 69/33/67
+# XGB: 66/33/65
+
+# Remove outliers - this DOES improve performance :)
+# print(data.iloc[603])
+# print(data.iloc[329])
+# data = data.drop(329) # Class 7 high sulfate
+# data = data.drop(603) # Class 7 high sulfate
+# data = data.drop(399) # Class 6 high free sulfur dioxide
+
+# points = data[data['free sulfur dioxide'] > 60] # Filter out on criteria
+# print(points)
+
+# plt.scatter(data['total sulfur dioxide'], data['pH'])
+# plt.show()
+# plt.figure()
+
 test_data = pd.read_csv('./data/TestData.csv')
 
 # Performs classification with given model and data.
@@ -26,12 +58,40 @@ test_data = pd.read_csv('./data/TestData.csv')
 # @param print_csv: whether or not the output should be printed to a CSV file
 def classify(model, data, print_csv=False):
     # Convert data from Pandas DataFrame to np array for X and y
-    X = np.asarray(data)[:, :11]
-    y = np.asarray(data)[:, 11]
+    X = data[data.columns[:11]]
+    y = data[data.columns[11]]
 
     # Partition data into train and test samples
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, )
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state=27)
     
+    # Combine the train data with its labels so we can split up by class and remove outliers
+    train_full = X_train
+    train_full['label'] = y_train
+    print(train_full)
+    filtered_data = None
+    # Separate data into classes
+    for i in range(3, 9):
+        classi = X_train[train_full['label'] == i]
+        z = np.abs(stats.zscore(classi))
+        classi_o = classi[(z < 3).all(axis=1)]
+        print(f'Outliers in class {i}: {len(classi_o)}')
+
+        # f = classi['alcohol']
+        # classi = classi[f.between(f.quantile(.15), f.quantile(.85))]
+        # print("Outliers removed: ", len(classi))
+        # print("All: ", len(f))
+        # if filtered_data is None:
+        #     filtered_data = classi
+        # else:
+        #     filtered_data = filtered_data.append(classi)
+        # l = classi[(np.abs(stats.zscore(classi)) < 3).all(axis=1)]
+        # print(f"Length of class {i}: {len(l)}")
+    print(filtered_data)
+
+    X_train = filtered_data[filtered_data.columns[:11]]
+    y_train = filtered_data[filtered_data.columns[11]]
+    
+
     # Classify with given model and print report
     model.fit(X_train, y_train)
 
@@ -104,11 +164,13 @@ def colorFromIndex(index):
         return '#000000'
     
 
-LogisticSubsetSelection.performRegression(data)
-LogisticSubsetSelection.performRegression(data, 1)
-plt.figure(figsize=(12, 12))
-sns.heatmap(data=data.corr(), annot=True)
-#plt.show()
+
+# ylabels = np.asarray(data['label'])
+# ylabels = [round(value) for value in ylabels]
+# plt.hist(ylabels, bins=6)
+# plt.ylabel('Count')
+# plt.xlabel('Label')
+# plt.show()
 
 # Classify with Stochastic Gradient Descent & print report
 sgd = SGDClassifier(penalty=None)
@@ -121,12 +183,12 @@ print("K Nearest Neighbors classifier results:")
 #classify(knn, data)
 
 # Classify with Random Forest Classifier & print report
-rfc = RandomForestClassifier(n_estimators=500)
+rfc = RandomForestClassifier(n_estimators=500, random_state=27)
 print("Random Forest classifier results:")
-#classify(rfc, data)
+classify(rfc, data)
 
 #performPlots(data)
 # Classify with EXTREME GRADIENT BOOOOSTING & print report
 xgb = XGBRegressor(n_estimators=750, n_jobs=4, objective='reg:squarederror', tree_method='hist')
 print("EXTREME Gradient Boosting results:")
-classify(xgb, data, print_csv=False)
+#classify(xgb, data, print_csv=False)
